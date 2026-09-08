@@ -17,6 +17,7 @@ private struct HistoryItemQuery {
   }
 }
 
+@MainActor
 class MaccyUITests: XCTestCase {
   let app = XCUIApplication()
   let pasteboard = NSPasteboard.general

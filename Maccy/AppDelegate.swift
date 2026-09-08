@@ -4,7 +4,7 @@ import Sparkle
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-  static let isTesting = CommandLine.arguments.contains("enable-testing")
+  nonisolated static let isTesting = CommandLine.arguments.contains("enable-testing")
   var panel: FloatingPanel<ContentView>!
 
   @objc

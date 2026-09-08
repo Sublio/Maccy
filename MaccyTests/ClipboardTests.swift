@@ -3,6 +3,7 @@ import Defaults
 @testable import Maccy
 
 // swiftlint:disable type_body_length
+@MainActor
 class ClipboardTests: XCTestCase {
   let clipboard = Clipboard.shared
   let pasteboard = NSPasteboard.general
@@ -202,7 +203,6 @@ class ClipboardTests: XCTestCase {
     waitForExpectations(timeout: 2)
   }
 
-  @MainActor
   func testCopy() {
     let imageData = image.tiffRepresentation!
     let contents = [
@@ -222,14 +222,12 @@ class ClipboardTests: XCTestCase {
     XCTAssertEqual(pasteboard.string(forType: .source), "com.foo.bar")
   }
 
-  @MainActor
   func testCopyString() {
     clipboard.copyInMaccy("foo")
     XCTAssertEqual(pasteboard.string(forType: .string), "foo")
     XCTAssertEqual(pasteboard.string(forType: .source), NSPasteboard.PasteboardType.fromMaccy.rawValue)
   }
 
-  @MainActor
   func testCopyWithoutFormatting() {
     let contents = [
       HistoryItemContent(type: stringType.rawValue, value: "foo".data(using: .utf8)!),

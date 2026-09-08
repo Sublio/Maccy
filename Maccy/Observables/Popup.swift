@@ -58,7 +58,7 @@ class Popup {
     initEventsMonitor()
   }
 
-  deinit {
+  isolated deinit {
     deinitEventsMonitor()
   }
 
