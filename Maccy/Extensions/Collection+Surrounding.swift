@@ -1,4 +1,4 @@
-extension Collection where Element: Equatable {
+nonisolated extension Collection where Element: Equatable {
   func item(after: Element, where predicate: (Element) -> Bool) -> Element? {
     guard let currentIndex = firstIndex(of: after) else {
       return nil
@@ -49,7 +49,7 @@ extension Collection where Element: Equatable {
   }
 }
 
-extension Array where Element: Equatable {
+nonisolated extension Array where Element: Equatable {
   func nearest(to element: Element, where condition: (Element) -> Bool) -> Element? {
     guard let currentIndex = firstIndex(of: element) else {
       return nil

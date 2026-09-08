@@ -65,7 +65,23 @@ class History: ItemsContainer { // swiftlint:disable:this type_body_length
   @ObservationIgnored
   var all: [HistoryItemDecorator] = []
 
+#if DEBUG
+  // Only true for the unit test bundle, which is injected into this process.
+  // UI tests launch the app separately, so the variable is absent there and
+  // they keep the production behaviour. Note `AppDelegate.isTesting` cannot be
+  // used to tell them apart: the test plan passes `enable-testing` to both.
+  static let isRunningUnitTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+#endif
+
   init() {
+    #if DEBUG
+    // Every observer below reacts to a preference change by asynchronously
+    // rebuilding the history. Under unit tests a rebuild can land after another
+    // test case has already emptied the store, and recreating decorators from
+    // deleted models traps inside SwiftData, so the observers stay off there.
+    guard !Self.isRunningUnitTests else { return }
+    #endif
+
     Task {
       for await _ in Defaults.updates(.pasteByDefault, initial: false) {
         updateShortcuts()

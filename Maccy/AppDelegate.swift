@@ -4,7 +4,7 @@ import Sparkle
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-  static let isTesting = CommandLine.arguments.contains("enable-testing")
+  nonisolated static let isTesting = CommandLine.arguments.contains("enable-testing")
   var panel: FloatingPanel<ContentView>!
 
   @objc
@@ -179,18 +179,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc
   private func performStatusItemClick() {
-    if let event = NSApp.currentEvent {
-      let modifierFlags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+    // Also consult the live keyboard state: synthesized clicks (e.g. XCUITest's
+    // `perform(withKeyModifiers:)`) hold the modifier down without stamping it
+    // onto the mouse event, and accessibility presses may have no event at all.
+    let modifierFlags = (NSApp.currentEvent?.modifierFlags ?? [])
+      .union(NSEvent.modifierFlags)
+      .intersection(.deviceIndependentFlagsMask)
 
-      if modifierFlags.contains(.option) {
-        Defaults[.ignoreEvents].toggle()
+    if modifierFlags.contains(.option) {
+      Defaults[.ignoreEvents].toggle()
 
-        if modifierFlags.contains(.shift) {
-          Defaults[.ignoreOnlyNextEvent] = Defaults[.ignoreEvents]
-        }
-
-        return
+      if modifierFlags.contains(.shift) {
+        Defaults[.ignoreOnlyNextEvent] = Defaults[.ignoreEvents]
       }
+
+      return
     }
 
     panel.toggle(height: AppState.shared.popup.height, at: .statusItem)

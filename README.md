@@ -165,6 +165,10 @@ but I couldn't. So I've decided to build one.
 
 Also, I wanted to learn Swift and get acquainted with macOS application development.
 
+## Development
+
+Maccy requires Xcode26+ due to migration to swift 6.
+
 
 ## License
 

@@ -49,7 +49,10 @@ class Popup {
     return suitableHeight(for: 3 * Popup.itemHeight)
   }
 
-  private var eventsMonitor: Any?
+  // Read from deinit, which cannot be actor-isolated without relying on
+  // `isolated deinit`. Nothing else can reach the instance by then, so the
+  // unchecked access is safe.
+  nonisolated(unsafe) private var eventsMonitor: Any?
 
   private var state: PopupState = .toggle
 
@@ -59,7 +62,9 @@ class Popup {
   }
 
   deinit {
-    deinitEventsMonitor()
+    if let eventsMonitor {
+      NSEvent.removeMonitor(eventsMonitor)
+    }
   }
 
   func initEventsMonitor() {

@@ -1,6 +1,6 @@
 import Foundation
 
-extension String {
+nonisolated extension String {
   // Unicode scalars that are known to hang CoreText's line truncation on
   // macOS 26. See https://github.com/p0deje/Maccy/issues/1520.
   //

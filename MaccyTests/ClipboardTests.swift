@@ -3,6 +3,7 @@ import Defaults
 @testable import Maccy
 
 // swiftlint:disable type_body_length
+@MainActor
 class ClipboardTests: XCTestCase {
   let clipboard = Clipboard.shared
   let pasteboard = NSPasteboard.general
@@ -136,8 +137,10 @@ class ClipboardTests: XCTestCase {
     XCTAssertFalse(Defaults[.ignoreOnlyNextEvent])
   }
 
-  func testIgnoreApplication() {
-    Defaults[.ignoredApps] = ["com.apple.dt.Xcode", "com.apple.finder"] // Finder is on Bitrise
+  func testIgnoreApplication() throws {
+    // Clipboard attributes a copy to the frontmost application, which differs
+    // between a local run and CI, so read it back instead of hardcoding it.
+    Defaults[.ignoredApps] = [try frontmostAppBundleIdentifier()]
 
     let hookExpectation = expectation(description: "Hook is called")
     hookExpectation.isInverted = true
@@ -150,9 +153,9 @@ class ClipboardTests: XCTestCase {
     waitForExpectations(timeout: 2)
   }
 
-  func testIgnoreAllApplicationsExcept() {
+  func testIgnoreAllApplicationsExcept() throws {
     Defaults[.ignoreAllAppsExceptListed] = true
-    Defaults[.ignoredApps] = ["com.apple.dt.Xcode", "com.apple.finder"] // Finder is on Bitrise
+    Defaults[.ignoredApps] = [try frontmostAppBundleIdentifier()]
 
     let hookExpectation = expectation(description: "Hook is called")
     clipboard.onNewCopy({ (_: HistoryItem) in
@@ -202,7 +205,6 @@ class ClipboardTests: XCTestCase {
     waitForExpectations(timeout: 2)
   }
 
-  @MainActor
   func testCopy() {
     let imageData = image.tiffRepresentation!
     let contents = [
@@ -222,14 +224,12 @@ class ClipboardTests: XCTestCase {
     XCTAssertEqual(pasteboard.string(forType: .source), "com.foo.bar")
   }
 
-  @MainActor
   func testCopyString() {
     clipboard.copyInMaccy("foo")
     XCTAssertEqual(pasteboard.string(forType: .string), "foo")
     XCTAssertEqual(pasteboard.string(forType: .source), NSPasteboard.PasteboardType.fromMaccy.rawValue)
   }
 
-  @MainActor
   func testCopyWithoutFormatting() {
     let contents = [
       HistoryItemContent(type: stringType.rawValue, value: "foo".data(using: .utf8)!),
@@ -322,6 +322,17 @@ class ClipboardTests: XCTestCase {
     pasteboard.writeObjects([item])
 
     waitForExpectations(timeout: 2)
+  }
+
+  // Mirrors how Clipboard resolves the source of a copy. A headless machine can
+  // have no frontmost application at all, in which case nothing is attributed
+  // and there is no ignore behaviour left to assert.
+  private func frontmostAppBundleIdentifier() throws -> String {
+    guard let bundleIdentifier = NSWorkspace.shared.frontmostApplication?.bundleIdentifier else {
+      throw XCTSkip("No frontmost application to attribute a copy to")
+    }
+
+    return bundleIdentifier
   }
 }
 // swiftlint:enable type_body_length

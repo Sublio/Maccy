@@ -41,7 +41,8 @@ struct StorageSettingsPane: View {
       }
     }
 
-    private var observer: Defaults.Observation?
+    // See Popup.eventsMonitor: read from a non-isolated deinit.
+    nonisolated(unsafe) private var observer: Defaults.Observation?
 
     init() {
       observer = Defaults.observe(.enabledPasteboardTypes) { change in

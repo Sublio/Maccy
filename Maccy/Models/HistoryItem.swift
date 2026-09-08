@@ -6,6 +6,7 @@ import Vision
 
 @Model
 class HistoryItem {
+  @MainActor
   static var supportedPins: Set<String> {
     // "a" reserved for select all
     // "q" reserved for quit
@@ -92,6 +93,7 @@ class HistoryItem {
       }
   }
 
+  @MainActor
   func generateTitle() -> String {
     guard image == nil else {
       Task {
@@ -231,6 +233,7 @@ class HistoryItem {
       .compactMap { $0.value }
   }
 
+  @MainActor
   private func performTextRecognition() {
     guard let cgImage = image?.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
       return
