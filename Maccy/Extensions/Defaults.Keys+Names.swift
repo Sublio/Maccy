@@ -7,7 +7,7 @@ nonisolated struct StorageType {
   static let text = StorageType(types: [.html, .rtf, .string])
   static let all = StorageType(types: files.types + images.types + text.types)
 
-  let types: [NSPasteboard.PasteboardType]
+  var types: [NSPasteboard.PasteboardType]
 }
 
 nonisolated extension Defaults.Keys {
